@@ -1,0 +1,8 @@
+{
+  "name": "wikinote/wikinote",
+  "autoload": {
+    "psr-4": {
+      "WikiNote\\": "WikiNote/"
+    }
+  }
+}

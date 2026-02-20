@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PHPSiteEngine Update Notification</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f4f4f4;
+        color: #333;
+    }
+    .container {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    .checkbox-wrapper {
+        margin-bottom: 20px;
+    }
+    .form-wrapper {
+        display: none;
+    }
+    
+    .checkbox-wrapper input[type="checkbox"]:checked ~ .form-wrapper { display: block;   }
+    button {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        margin: 40px auto 5px auto;
+    	display: block;
+    }
+    button:hover {
+        background-color: #0056b3;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h2>New Version of PHPSiteEngine Available!</h2>
+    <p>Please ensure you have made a backup of your database before proceeding with the migration.</p>
+    
+    <div class="checkbox-wrapper">
+        <input type="checkbox" id="backupCheckbox">
+        <label for="backupCheckbox">I have made a backup of the database</label>
+        
+        <div class="form-wrapper">
+            <form action="?" method="post">
+                <input type="hidden" name="installNewVersion" value="true">
+                <button type="submit">Start Migration</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

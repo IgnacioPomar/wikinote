@@ -1,0 +1,24 @@
+{
+	"tablename": "wnUsers",
+	"fields": {
+		"idUser":		{"type": "uuid","length": 36, "formType":"hidden"},
+		"username":		{"type": "string","length": 100, "label": "Username"},
+		"email":		{"type": "string","length": 255, "label": "Email", "formType":"email"},
+		"name":			{"type": "string","length": 100, "label": "User name"},
+		"passwordHash": {"type": "string","length": 255, "label": "Password hash"},
+		"password": 	{"type": "string","length": 255, "label": "Password", "formType":"password"},
+		"recoveryPass":	{"type": "string","length": 50},
+		"recoveryDate": {"type": "datetime"},
+		"lastLogin": 	{"type": "datetime"},
+		"isActive": 	{"type": "bool", "default": 1, "label": "Is active"},
+		"isAdmin": 		{"type": "bool", "default": 0, "label": "Is an administrator"},
+		"createdAt": 	{"type": "datetime"},
+		"updatedAt": 	{"type": "datetime"},
+		"tokenVersion": {"type": "int", "default": 0}
+	},
+	"indexes": [
+		{"fields": ["idUser"],"primary": true},
+		{"type": "unique", "fields": ["username"]},
+		{"type": "unique", "fields": ["email"]}
+	]
+}

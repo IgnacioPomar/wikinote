@@ -1,0 +1,10 @@
+<div class="error">
+	<b>Security warning</b>: the configuration path appears to be publicly reachable.
+	<br>Config file: <code>@@cfgFile@@</code>
+	<br>Config directory: <code>@@cfgDir@@</code>
+	<br>Public check link: <a href="@@cfgUrl@@" target="_blank" rel="noopener noreferrer">@@cfgUrl@@</a>
+	<br>Recommended action:
+	<br>1) Edit <code>index.php</code> and move config outside web root.
+	<br>2) Restrict access in @@serverName@@:
+	<pre>@@serverSnippet@@</pre>
+</div>

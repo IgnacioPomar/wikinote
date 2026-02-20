@@ -1,0 +1,12 @@
+{
+	"tablename": "wnUserGroups",
+	"fields": {
+		"userUuid":   {"type": "uuid", "length": 36},
+		"groupId":    {"type": "int"},
+		"createdAt":  {"type": "datetime"}
+	},
+	"indexes": [
+		{"fields": ["userUuid", "groupId"], "primary": true},
+		{"fields": ["groupId"]}
+	]
+}

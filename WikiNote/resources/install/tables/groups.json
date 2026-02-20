@@ -1,0 +1,13 @@
+{
+	"tablename": "wnGroups",
+	"fields": {
+		"idGroup":    {"type": "auto"},
+		"name":       {"type": "string", "length": 100},
+		"createdAt":  {"type": "datetime"},
+		"updatedAt":  {"type": "datetime"}
+	},
+	"indexes": [
+		{"fields": ["idGroup"], "primary": true},
+		{"type": "unique", "fields": ["name"]}
+	]
+}

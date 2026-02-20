@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Setup access page</title>
+	<link rel="stylesheet" href="@@rscUriPath@@css/adminLogin.css" />
+
+</head>
+<body>
+	<div class="loginbox">
+		<div class="logo">
+			<img src="@@rscUriPath@@img/setupIsotype.svg" alt="Webengine setup logo" />
+		</div>
+		<div class="form">
+			<form method="post">
+				<div>
+					<img src="@@rscUriPath@@img/adminLoginUser.svg" class="inputIcon"/>
+					@@errorInfo@@
+					<input type='email' id='user' name='user' required='required' value='' placeholder='user email' />
+				</div>
+				<div>
+					<img src="@@rscUriPath@@img/adminLoginPadlock.svg" class="inputIcon"/>
+					<input type='password' id='password' name='password' required='required' value='' placeholder='Password' />
+				</div>
+				<input type='submit' value='Open Setup' />
+			</form>
+		</div>
+	</div>
+</body>
+</html>

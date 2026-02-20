@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>
+<title>Site installation</title>
+<style>
+table {
+	margin: 0 auto;
+	font-family: Tahoma, Verdana, sans-serif;
+	background-color: #eee;
+	padding: 8px;
+	border: 2px solid #ddd;
+}
+
+.title {
+	text-align: center;
+	padding: 8px 2px;
+	border: 2px solid #ddd;
+	background-color: #e6e6e6;
+}
+
+form {
+	margin-top: 50px;
+	padding-top: 100px;
+}
+
+td {
+	padding: 2px;
+}
+
+[type=text], [type=password], [type=number] {
+	border: 2px inset #aaa;
+	padding: 1px 3px;
+}
+.error {
+	background: #ffe8e8;
+	border: 2px solid #c00000;
+	color: #7a0000;
+	padding: 10px;
+	margin: 12px auto;
+	max-width: 900px;
+}
+</style>
+
+<script type="text/javascript">
+window.onload = function () {
+	document.getElementById("adminpass1").onchange = validatePassword;
+	document.getElementById("adminpass2").onchange = validatePassword;
+}
+function validatePassword(){
+var pass2=document.getElementById("adminpass2").value;
+var pass1=document.getElementById("adminpass1").value;
+if(pass1!=pass2)
+	document.getElementById("adminpass2").setCustomValidity("Password verification failed: values are different");
+else
+	document.getElementById("adminpass2").setCustomValidity('');	 
+//empty string means no validation error
+}
+</script>
+
+</head>
+
+<body>
+	<form method='post'>
+		<table>
+			<tbody>
+				<tr>
+					<td colspan='2' class='title'>Database configuration</td>
+				</tr>
+				<tr>
+					<td><label for='dbserver'>Server address</label></td>
+					<td><input type='text' id='dbserver' name='dbserver'
+						required='required' value='127.0.0.1'></td>
+				</tr>
+				<tr>
+					<td><label for='dbport'>Server port</label></td>
+					<td><input type='number' id='dbport' name='dbport'
+						required='required' value='3306'></td>
+				</tr>
+				<tr>
+					<td><label for='dbname'>Database name</label></td>
+					<td><input type='text' id='dbname' name='dbname'
+						required='required' value='' autofocus='autofocus'></td>
+				</tr>
+				<tr>
+					<td><label for='dbuser'>Database user</label></td>
+					<td><input type='text' id='dbuser' name='dbuser'
+						required='required' value=''></td>
+				</tr>
+				<tr>
+					<td><label for='dbpass'>Database password</label></td>
+					<td><input type='password' id='dbpass' name='dbpass'
+						required='required' value=''></td>
+				</tr>
+				
+				<tr>
+					<td colspan='2' class='title'>Administrator user configuration</td>
+				</tr>
+				<tr>
+					<td><label for='adminname'>Display name</label></td>
+					<td><input type='text' id='adminname' name='adminname'
+						value=''></td>
+				</tr>
+				<tr>
+					<td><label for='adminlogin'>User email</label></td>
+					<td><input type='email' id='adminlogin' name='adminlogin'
+						required='required' value=''></td>
+				</tr>
+				<tr>
+					<td><label for='adminpass1'>Password</label></td>
+					<td><input type='password' id='adminpass1' name='adminpass1'
+						required='required' value=''></td>
+				</tr>
+				<tr>
+					<td><label for='adminpass2'>Repeat password</label></td>
+					<td><input type='password' id='adminpass2' name='adminpass2'
+						required='required' value=''></td>
+				</tr>
+				<tr>
+					<td colspan='2' class='title'><input type='submit'
+						value='Start installation'></td>
+				</tr>
+			</tbody>
+		</table>
+	</form>
+</body>
+
+</html>
