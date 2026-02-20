@@ -1,0 +1,12 @@
+{
+  "id": "default",
+  "name": "Default",
+  "version": "1.0.0",
+  "parent": null,
+  "templatesDir": "tmplt",
+  "assets": {
+    "wiki": ["css/core.css", "css/skin.css", "css/wiki.css", "js/wiki.js"],
+    "login": ["css/core.css", "css/skin.css", "css/login.css", "js/login.js"],
+    "special": ["css/core.css", "css/skin.css", "css/special.css"]
+  }
+}

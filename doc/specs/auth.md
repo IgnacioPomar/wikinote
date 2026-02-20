@@ -39,6 +39,7 @@ Minimum fields:
 - `passwordHash`
 - `isAdmin` (boolean)
 - `isActive` (boolean)
+- `tokenVersion` (integer, default `0`)
 - `createdAt`
 - `updatedAt`
 
@@ -81,8 +82,8 @@ groups: string[]
 
 - Type: access token
 - Lifetime: **15 minutes**
-- Stateless validation
-- No database lookup required
+- Stateless signature validation
+- One lightweight database lookup is required to validate `ver` vs `users.tokenVersion`
 
 ### 4.2 Signing Algorithm
 
@@ -118,6 +119,7 @@ Alternative:
 | `username` | string | username |
 | `groups` | string[] | group membership |
 | `isAdmin` | boolean | administrative privileges |
+| `ver` | integer | user token version, must match `users.tokenVersion` |
 
 ---
 
@@ -133,7 +135,8 @@ Alternative:
   "userUuid": "a1b2c3d4-....",
   "username": "ignacio",
   "groups": ["finance", "ops"],
-  "isAdmin": false
+  "isAdmin": false,
+  "ver": 3
 }
 ```
 
@@ -143,7 +146,7 @@ Alternative:
 
 ### Current strategy
 
-- Access tokens expire after **15 minutes**
+- Access tokens expire after **60 minutes**
 - No refresh tokens yet
 - Users re-authenticate after expiration
 
@@ -157,7 +160,7 @@ Changes to:
 - administrative privileges
 - account activation
 
-may take up to **15 minutes** to propagate.
+may take up to **60 minutes** to propagate.
 
 This is acceptable for the current phase.
 
@@ -181,29 +184,23 @@ Validation flow:
 2. check Redis for `jti`
 3. reject token if present
 
-### Optional: user-wide invalidation
+### User-wide invalidation (mandatory): token versioning
 
-#### Option A — token versioning
+`tokenVersion` is required in `users` and `ver` is required in JWT.
 
-Add to users table:
+Validation flow must include:
 
-```
-tokenVersion
-```
+1. load `users.tokenVersion` for `userUuid` in token
+2. compare token `ver` with database `tokenVersion`
+3. reject token if values differ
 
-Add to JWT:
+Revocation events must increment `users.tokenVersion`:
 
-```
-ver
-```
+- password change
+- account disable/enable transitions
+- explicit "logout all sessions"
 
-Reject tokens with outdated versions.
-
-#### Option B — user revocation set
-
-```
-revokedUsers:{userUuid}
-```
+This instantly invalidates all previously issued access tokens for that user.
 
 ---
 
@@ -232,9 +229,10 @@ For each request:
 2. verify signature
 3. validate `exp`, `iss`, `aud`
 4. extract claims
-5. (future) check Redis denylist
+5. compare `ver` with `users.tokenVersion`
+6. (future) check Redis denylist
 
-No database lookup is required.
+One database lookup is required to validate `tokenVersion`.
 
 ---
 

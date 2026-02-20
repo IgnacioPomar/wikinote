@@ -6,6 +6,7 @@ class Context
 {
 	public \mysqli $mysqli;
 	public ?string $userId;
-
-    //TODO: the JWT data
+	public bool $isAdmin = false;
+	public array $groups = [];
+	public ?array $jwtClaims = null;
 }

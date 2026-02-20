@@ -32,6 +32,18 @@ class Site
 	public static $rscUriPath;
 
 	// ----------- Configurated Folders -----------
+	// Folder who stores all skins
+	public static $skinsRootPath;
+
+	// Browser path to all skins
+	public static $skinsUriPath;
+
+	// Active skin id
+	public static $activeSkinId;
+
+	// Fallback skin id
+	public static $fallbackSkinId;
+
 	// Folder who stores the skin
 	public static $skinPath;
 
@@ -43,6 +55,9 @@ class Site
 
 	// Browser path to installer templates
 	public static $installTemplatesUriPath;
+
+	// Folder for runtime cache
+	public static $cachePath;
 
 
 	// ----------- Methods -----------
@@ -66,10 +81,14 @@ class Site
 
 		self::$cfgFile = self::$rootPath . $cfgFile;
 		self::$cfgPath = dirname (self::$cfgFile) . DIRECTORY_SEPARATOR;
+		self::$cachePath = self::$cfgPath . 'cache' . DIRECTORY_SEPARATOR . 'themes' . DIRECTORY_SEPARATOR;
 
 		self::$rscPath = self::$nsPath . 'rsc' . DIRECTORY_SEPARATOR;
 		self::$rscUriPath = self::$uriPath . $reflector->getNamespaceName () . DIRECTORY_SEPARATOR . 'rsc' . DIRECTORY_SEPARATOR;
 		self::$installTemplatesUriPath = self::$uriPath . $reflector->getNamespaceName () . '/resources/install/templates/';
+
+		self::$skinsRootPath = self::$rootPath . 'skins' . DIRECTORY_SEPARATOR;
+		self::$skinsUriPath = self::$uriPath . 'skins' . DIRECTORY_SEPARATOR;
 	}
 
 
@@ -78,11 +97,53 @@ class Site
 	 */
 	public static function initCfg ()
 	{
-		self::$skinPath = self::$rootPath . $GLOBALS ['skin'] . DIRECTORY_SEPARATOR;
+		self::$activeSkinId = self::normalizeSkinId ((string) ($GLOBALS ['skin'] ?? 'default'));
+		self::$fallbackSkinId = self::normalizeSkinId ((string) ($GLOBALS ['skinFallback'] ?? 'default'));
+
+		if (self::$activeSkinId === '')
+		{
+			self::$activeSkinId = 'default';
+		}
+		if (self::$fallbackSkinId === '')
+		{
+			self::$fallbackSkinId = 'default';
+		}
+
+		$activeSkinPath = self::$skinsRootPath . self::$activeSkinId . DIRECTORY_SEPARATOR;
+		if (! is_dir ($activeSkinPath))
+		{
+			$activeSkinPath = self::$skinsRootPath . self::$fallbackSkinId . DIRECTORY_SEPARATOR;
+			self::$activeSkinId = is_dir ($activeSkinPath) ? self::$fallbackSkinId : 'default';
+			$activeSkinPath = self::$skinsRootPath . self::$activeSkinId . DIRECTORY_SEPARATOR;
+		}
+
+		self::$skinPath = $activeSkinPath;
 		self::$templatePath = self::$skinPath . 'tmplt' . DIRECTORY_SEPARATOR;
-		self::$uriSkinPath = self::$uriPath . $GLOBALS ['skin'] . DIRECTORY_SEPARATOR;
+		self::$uriSkinPath = self::$skinsUriPath . self::$activeSkinId . DIRECTORY_SEPARATOR;
+	}
+
+	private static function normalizeSkinId (string $skinValue): string
+	{
+		$skinValue = trim ($skinValue);
+		if ($skinValue === '')
+		{
+			return 'default';
+		}
+
+		$skinValue = str_replace ('\\', '/', $skinValue);
+		$skinValue = trim ($skinValue, '/');
+
+		if (substr ($skinValue, 0, 6) === 'skins/')
+		{
+			$skinValue = substr ($skinValue, 6);
+		}
+
+		if ($skinValue === '' || strpos ($skinValue, '..') !== false)
+		{
+			return 'default';
+		}
+
+		$parts = explode ('/', $skinValue);
+		return (string) end ($parts);
 	}
 }
-
-
-

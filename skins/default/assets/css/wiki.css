@@ -1,0 +1,32 @@
+.wn-note-body {
+	font-family: var(--wn-font-reading);
+	font-size: 1.08rem;
+	line-height: 1.72;
+	color: #2a2d33;
+}
+
+.wn-note-body p {
+	margin: 0 0 0.9rem;
+}
+
+.wn-note-body h2,
+.wn-note-body h3 {
+	font-family: var(--wn-font-ui);
+	margin: 1.2rem 0 0.5rem;
+}
+
+.wn-note-body blockquote {
+	margin: 1rem 0;
+	padding: 0.4rem 0.9rem;
+	border-left: 4px solid #6b8f82;
+	background: rgba(31, 111, 95, 0.08);
+	border-radius: 0 8px 8px 0;
+}
+
+.wn-note-body code {
+	font-family: "Cascadia Code", "Consolas", monospace;
+	font-size: 0.94em;
+	background: rgba(17, 24, 39, 0.08);
+	padding: 0.08rem 0.3rem;
+	border-radius: 5px;
+}

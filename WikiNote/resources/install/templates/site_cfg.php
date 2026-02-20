@@ -23,6 +23,9 @@ $GLOBALS ['dbname'] = '@@dbname@@';
 
 
 $GLOBALS ['skin'] = '@@skins@@';
+$GLOBALS ['skinFallback'] = 'default';
+$GLOBALS ['customCssEnabled'] = true;
+$GLOBALS ['themeCacheTtl'] = 3600;
 
 // ----------------------------------
 define ('SERVER_ENCODING', 'UTF-8');
