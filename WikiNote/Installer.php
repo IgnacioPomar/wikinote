@@ -593,12 +593,54 @@ class Installer
                 }
             }
         }
-        catch (\Throwable $e)
-        {
-            $retVal .= '<div class="fail"><b>Error</b>: ' . $this->esc($e->getMessage()) . '</div>';
-        }
+		catch (\Throwable $e)
+		{
+			$retVal .= '<div class="fail"><b>Error</b>: ' . $this->esc($e->getMessage()) . '</div>';
+		}
+
+		$this->syncCfgVersion ($retVal);
 
         return $retVal;
+	}
+
+	private function syncCfgVersion (&$out): bool
+	{
+		if (! is_file (Site::$cfgFile))
+		{
+			return true;
+		}
+
+		$cfgContent = file_get_contents (Site::$cfgFile);
+		if ($cfgContent === false)
+		{
+			$out .= '<div class="fail"><b>Error</b>: Unable to read config file to sync version.</div>';
+			return false;
+		}
+
+		$versionLine = "\$GLOBALS ['Version'] = '" . Site::VERSION . "';";
+		$pattern = "/\\$GLOBALS\\s*\\['Version'\\]\\s*=\\s*'[^']*'\\s*;/";
+		if (preg_match ($pattern, $cfgContent))
+		{
+			$cfgUpdated = preg_replace ($pattern, $versionLine, $cfgContent, 1);
+		}
+		else
+		{
+			$cfgUpdated = rtrim ($cfgContent) . "\n\n" . $versionLine . "\n";
+		}
+
+		if ($cfgUpdated === null)
+		{
+			$out .= '<div class="fail"><b>Error</b>: Unable to sync config version line.</div>';
+			return false;
+		}
+
+		if ($cfgUpdated !== $cfgContent && file_put_contents (Site::$cfgFile, $cfgUpdated) === false)
+		{
+			$out .= '<div class="fail"><b>Error</b>: Unable to write config file version.</div>';
+			return false;
+		}
+
+		return true;
 	}
 
 
@@ -721,6 +763,7 @@ class Installer
             '@@dbuser@@'      => $_POST['dbuser'] ?? '',
             '@@dbpass@@'      => $_POST['dbpass'] ?? '',
             '@@dbname@@'      => $_POST['dbname'] ?? '',
+            '@@siteVersion@@' => Site::VERSION,
             '@@plgs@@'        => $_POST['plgs'] ?? '',
             '@@skins@@'       => $_POST['skins'] ?? '',
             '@@menuType@@'    => $_POST['mnu'] ?? '',
