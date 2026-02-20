@@ -1,6 +1,6 @@
 <?php
 
-namespace PHPSiteEngine;
+namespace WikiNote;
 
 class UUIDv7
 {

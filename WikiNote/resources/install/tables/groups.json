@@ -1,7 +1,7 @@
 {
 	"tablename": "wnGroups",
 	"fields": {
-		"idGroup":    {"type": "auto"},
+		"idGroup":    {"type": "uuid", "length": 36},
 		"name":       {"type": "string", "length": 100},
 		"createdAt":  {"type": "datetime"},
 		"updatedAt":  {"type": "datetime"}

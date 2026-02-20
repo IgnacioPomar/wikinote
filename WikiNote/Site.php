@@ -41,6 +41,9 @@ class Site
 	// Folder who stores the templates
 	public static $templatePath;
 
+	// Browser path to installer templates
+	public static $installTemplatesUriPath;
+
 
 	// ----------- Methods -----------
 	/**
@@ -66,6 +69,7 @@ class Site
 
 		self::$rscPath = self::$nsPath . 'rsc' . DIRECTORY_SEPARATOR;
 		self::$rscUriPath = self::$uriPath . $reflector->getNamespaceName () . DIRECTORY_SEPARATOR . 'rsc' . DIRECTORY_SEPARATOR;
+		self::$installTemplatesUriPath = self::$uriPath . $reflector->getNamespaceName () . '/resources/install/templates/';
 	}
 
 

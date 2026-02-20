@@ -2,7 +2,7 @@
 	"tablename": "wnUserGroups",
 	"fields": {
 		"userUuid":   {"type": "uuid", "length": 36},
-		"groupId":    {"type": "int"},
+		"groupId":    {"type": "uuid", "length": 36},
 		"createdAt":  {"type": "datetime"}
 	},
 	"indexes": [

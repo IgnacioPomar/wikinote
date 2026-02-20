@@ -6,19 +6,43 @@ namespace WikiNote;
 class Installer
 {
 	public \mysqli $mysqli;
+	private const MIN_PHP_VERSION = '8.0.0';
 
 
 	public static function installFromScratch ()
 	{
+		$step = $_GET ['step'] ?? 'license';
 		if (isset ($_POST ['dbname']))
 		{
-			readfile (Site::$nsPath . 'resources/install/templates/installResult.htm');
-			$installer = new Installer ();
-			print ($installer->installProcessFromScratch ());
+			$step = 'form';
 		}
-		else
+
+		switch ($step)
 		{
-			Installer::showInstallSetup ();
+			case 'form':
+				if (isset ($_POST ['dbname']))
+				{
+					self::renderTemplate ('installResult.htm');
+					$checks = self::runPreflightChecks ();
+					if (self::hasBlockingPreflightErrors ($checks))
+					{
+						print ('<div class="error"><b>Error</b>: Installation stopped due to blocking dependency checks.</div>');
+						return;
+					}
+					$installer = new Installer ();
+					print ($installer->installProcessFromScratch ());
+				}
+				else
+				{
+					self::showInstallSetup ();
+				}
+				break;
+			case 'requirements':
+				self::showRequirementsStep ();
+				break;
+			default:
+				self::showLicenseStep ();
+				break;
 		}
 	}
 
@@ -27,7 +51,13 @@ class Installer
 	{
 		if (isset ($_POST ['adminlogin']))
 		{
-			readfile (Site::$nsPath . 'resources/install/templates/installResult.htm');
+			self::renderTemplate ('installResult.htm');
+			$checks = self::runPreflightChecks ();
+			if (self::hasBlockingPreflightErrors ($checks))
+			{
+				print ('<div class="error"><b>Error</b>: Installation stopped due to blocking dependency checks.</div>');
+				return;
+			}
 			print ($this->installProcessCommon ());
 		}
 		else
@@ -42,23 +72,158 @@ class Installer
 		self::renderInstallForm ('installForm.htm');
 	}
 
-	private static function renderInstallForm (string $templateName): void
+	private static function renderTemplate (string $templateName, array $vars = []): void
 	{
-		$layout = file_get_contents (Site::$nsPath . 'resources/install/templates/' . $templateName);
-		$warning = self::getPublicConfigWarning ();
-		if ($warning !== '')
+		print (self::loadTemplate ($templateName, $vars));
+	}
+
+	private static function loadTemplate (string $templateName, array $vars = []): string
+	{
+		$templatePath = Site::$nsPath . 'resources/install/templates/' . $templateName;
+		$content = file_get_contents ($templatePath);
+		if ($content === false)
 		{
-			$rowWarning = "<tr><td colspan='2'>" . $warning . '</td></tr>';
-			$layout = preg_replace (
-				"/(<tr>\\s*<td colspan='2' class='title'><input type='submit'[^>]*><\\/td>\\s*<\\/tr>)/",
-				$rowWarning . "\n$1",
-				$layout,
-				1
-			);
+			return '';
 		}
+
+		$baseVars = [
+			'@@installCssUri@@' => Site::$installTemplatesUriPath . 'installCommon.css'
+		];
+
+		return strtr ($content, array_merge ($baseVars, $vars));
+	}
+
+	private static function getStepUrl (string $step): string
+	{
+		return '?step=' . rawurlencode ($step);
+	}
+
+	private static function showLicenseStep (): void
+	{
+		$layout = self::loadTemplate ('installStepLicense.htm');
+		if ($layout === '')
+		{
+			$layout = '<html><body><h1>License</h1><pre>@@licenseText@@</pre><a href="@@nextUrl@@">Next</a></body></html>';
+		}
+
+		$licensePath = Site::$rootPath . 'LICENSE';
+		$licenseText = is_file ($licensePath) ? file_get_contents ($licensePath) : 'License file not found.';
+
+		$layout = strtr ($layout, [
+			'@@licenseText@@' => self::escStatic ((string) $licenseText),
+			'@@nextUrl@@' => self::escStatic (self::getStepUrl ('requirements'))
+		]);
 
 		header ('Content-Type: text/html; charset=utf-8');
 		print ($layout);
+	}
+
+	private static function showRequirementsStep (): void
+	{
+		$layout = self::loadTemplate ('installStepRequirements.htm');
+		if ($layout === '')
+		{
+			$layout = '<html><body><h1>Requirements</h1>@@preflight@@@@securityWarning@@<a href="@@nextUrl@@">Next</a></body></html>';
+		}
+
+		$checks = self::runPreflightChecks ();
+		$warning = self::getPublicConfigWarning ();
+		if ($warning === '')
+		{
+			$warning = '<div class="ok"><b>Security</b>: Config path is not publicly reachable or access appears restricted.</div>';
+		}
+
+		$layout = strtr ($layout, [
+			'@@preflight@@' => self::renderPreflightChecks ($checks),
+			'@@securityWarning@@' => $warning,
+			'@@nextUrl@@' => self::escStatic (self::getStepUrl ('form')),
+			'@@backUrl@@' => self::escStatic (self::getStepUrl ('license'))
+		]);
+
+		header ('Content-Type: text/html; charset=utf-8');
+		print ($layout);
+	}
+
+	private static function renderInstallForm (string $templateName): void
+	{
+		$layout = self::loadTemplate ($templateName);
+
+		header ('Content-Type: text/html; charset=utf-8');
+		print ($layout);
+	}
+
+	private static function runPreflightChecks (): array
+	{
+		$cfgDir = dirname (Site::$cfgFile);
+		$cfgParent = dirname ($cfgDir);
+		$cfgWritable = is_dir ($cfgDir) ? is_writable ($cfgDir) : (is_dir ($cfgParent) && is_writable ($cfgParent));
+
+		return [
+			[
+				'status' => version_compare (PHP_VERSION, self::MIN_PHP_VERSION, '>=') ? 'ok' : 'error',
+				'blocking' => true,
+				'label' => 'PHP version',
+				'detail' => 'Current: ' . PHP_VERSION . ' (required: >= ' . self::MIN_PHP_VERSION . ')'
+			],
+			[
+				'status' => extension_loaded ('mysqli') ? 'ok' : 'error',
+				'blocking' => true,
+				'label' => 'MySQLi extension',
+				'detail' => extension_loaded ('mysqli') ? 'Available' : 'Missing extension: mysqli'
+			],
+			[
+				'status' => extension_loaded ('openssl') && function_exists ('openssl_pkey_new') ? 'ok' : 'error',
+				'blocking' => true,
+				'label' => 'OpenSSL extension',
+				'detail' => (extension_loaded ('openssl') && function_exists ('openssl_pkey_new')) ? 'Available (RSA keygen enabled)' : 'Missing OpenSSL RSA key generation support'
+			],
+			[
+				'status' => extension_loaded ('redis') || class_exists ('Redis') ? 'ok' : 'warning',
+				'blocking' => false,
+				'label' => 'Redis extension',
+				'detail' => (extension_loaded ('redis') || class_exists ('Redis')) ? 'Available' : 'Not installed (optional for now, needed for token denylist in future)'
+			],
+			[
+				'status' => $cfgWritable ? 'ok' : 'error',
+				'blocking' => true,
+				'label' => 'Config path writable',
+				'detail' => $cfgWritable ? 'Writable: ' . $cfgDir : 'Not writable: ' . $cfgDir
+			]
+		];
+	}
+
+	private static function hasBlockingPreflightErrors (array $checks): bool
+	{
+		foreach ($checks as $check)
+		{
+			if (($check ['blocking'] ?? false) && ($check ['status'] ?? '') === 'error')
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private static function renderPreflightChecks (array $checks): string
+	{
+		if (empty ($checks))
+		{
+			return '';
+		}
+
+		$html = '<div class="preflight"><b>Dependency pre-check</b>';
+		foreach ($checks as $check)
+		{
+			$status = $check ['status'] ?? 'warning';
+			$label = self::escStatic ((string) ($check ['label'] ?? 'Check'));
+			$detail = self::escStatic ((string) ($check ['detail'] ?? ''));
+			$prefix = strtoupper ($status);
+			$html .= '<div class="' . $status . '"><b>' . $prefix . '</b>: ' . $label . ' - ' . $detail . '</div>';
+		}
+		$html .= '</div>';
+
+		return $html;
 	}
 
 

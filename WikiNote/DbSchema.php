@@ -113,8 +113,7 @@ class DbSchema
 				}
 				break;
 			case 'uuid':
-				$length = $field ['length'] ?? ($field ['lenght'] ?? 36);
-				return " char({$length}) DEFAULT $defVal";
+				return " uuid DEFAULT $defVal";
 				break;
 		}
 	}
